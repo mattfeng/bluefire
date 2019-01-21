@@ -5,4 +5,3 @@ wordvec/
 __pycache__/
 *.hdf5
 *.db
-*.np[yz]

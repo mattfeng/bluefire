@@ -1,8 +1,5 @@
-# Author: Chris Moody <chrisemoody@gmail.com>
-# License: MIT
+#!/usr/bin/env python
 
-# This simple example loads the newsgroups data from sklearn
-# and train an LDA-like model on it
 import os
 import os.path
 import pickle
