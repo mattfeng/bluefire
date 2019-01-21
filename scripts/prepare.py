@@ -1,5 +1,5 @@
-# This simple example loads the newsgroups data from sklearn
-# and train an LDA-like model on it
+#!/usr/bin/env python
+
 import logging
 import pickle
 import glob
@@ -38,6 +38,8 @@ for file in files:
             text.append(word)
     texts.append(text)
 
+print("Unique words in texts:", word_idx)
+
 # create token numpy array, with padding of non-characters with -2
 max_length = max(len(text) for text in texts)
 num_texts = len(texts)
@@ -62,9 +64,7 @@ pruned = corpus.filter_count(compact, min_count=3)
 bow = corpus.compact_to_bow(pruned)
 # Words tend to have power law frequency, so selectively
 # downsample the most prevalent words
-
-# clean = corpus.subsample_frequent(pruned)
-clean = pruned
+clean = corpus.subsample_frequent(pruned)
 
 # Now flatten a 2D array of document per row and word position
 # per column to a 1D array of words. This will also remove skips
@@ -81,11 +81,11 @@ vectors, s, f = corpus.compact_word_vectors(vocab, filename=fn_wordvc)
 # Save all of the preprocessed files
 vocab_reversed = {v:k for k, v in vocab.items()}
 
-pickle.dump(vocab_reversed, open("vocab.pkl", "wb"))
-pickle.dump(corpus, open("corpus.pkl", "wb"))
+pickle.dump(vocab_reversed, open("./bin/vocab.pkl", "wb"))
+pickle.dump(corpus, open("./bin/corpus.pkl", "wb"))
 
-np.save("flattened", flattened)
-np.save("doc_ids", doc_ids)
-np.save("pruned", pruned)
-np.save("bow", bow)
-np.save("vectors", vectors)
+np.save("./bin/flattened", flattened)
+np.save("./bin/doc_ids", doc_ids)
+np.save("./bin/pruned", pruned)
+np.save("./bin/bow", bow)
+np.save("./bin/vectors", vectors)
