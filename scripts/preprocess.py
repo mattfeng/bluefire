@@ -77,14 +77,14 @@ def main():
     stopwords = load_stop_words()
 
     files = glob.glob("../extracted/*.txt")
-    files = ["../extracted/20190114071928_3101.txt"]
-    files = ["../extracted/20190115005958_3103.txt"]
     for path in files:
         doc = load_doc(path)
 
         processed = process_file(path, stopwords)
-        for word in processed:
-            print(word)
+
+        with open(path.replace("extracted", "segmented"), "w") as out:
+            for word in processed:
+                out.write(f"{word}\n")
 
 
 if __name__ == "__main__":

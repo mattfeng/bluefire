@@ -2,30 +2,52 @@
 # and train an LDA-like model on it
 import logging
 import pickle
+import glob
+from collections import OrderedDict
 
-from sklearn.datasets import fetch_20newsgroups
 import numpy as np
 
-from lda2vec import preprocess, Corpus
+from lda2vec import Corpus
 
 logging.basicConfig()
 
-# Fetch data
-remove = ('headers', 'footers', 'quotes')
-texts = fetch_20newsgroups(subset='train', remove=remove).data
-# Remove tokens with these substrings
-bad = set(["ax>", '`@("', '---', '===', '^^^'])
+SKIP_VAL = -2
 
+vocab = OrderedDict() # word -> val
+vocab["<SKIP>"] = SKIP_VAL
 
-def clean(line):
-    return ' '.join(w for w in line.split() if not any(t in w for t in bad))
+# 1. Load data into texts
+# -----------------------
+# texts is a 2D array, with each row representing
+# a unique document, and each column in a row representing
+# the word at that position.
 
-# Preprocess data
-max_length = 10000   # Limit of 10k words per document
-# Convert to unicode (spaCy only works with unicode)
-texts = [unicode(clean(d)) for d in texts]
-tokens, vocab = preprocess.tokenize(texts, max_length, merge=False,
-                                    n_threads=4)
+files = glob.glob("../segmented/*.txt")
+texts = []
+word_idx = 0
+for file in files:
+    text = []
+    with open(file) as fstream:
+        for line in fstream:
+            word = line.strip()
+            
+            if word not in vocab:       # build a dict of all words
+                vocab[word] = word_idx
+                word_idx += 1
+
+            text.append(word)
+    texts.append(text)
+
+# create token numpy array, with padding of non-characters with -2
+max_length = max(len(text) for text in texts)
+num_texts = len(texts)
+
+tokens = np.full((num_texts, max_length), SKIP_VAL)
+
+for row_idx, text in enumerate(texts):
+    for col_idx, word in enumerate(text):
+        tokens[row_idx, col_idx] = vocab[word]
+
 corpus = Corpus()
 # Make a ranked list of rare vs frequent words
 corpus.update_word_count(tokens)
@@ -47,13 +69,18 @@ clean = corpus.subsample_frequent(pruned)
 doc_ids = np.arange(pruned.shape[0])
 flattened, (doc_ids,) = corpus.compact_to_flat(pruned, doc_ids)
 assert flattened.min() >= 0
+
 # Fill in the pretrained word vectors
 n_dim = 300
-fn_wordvc = 'GoogleNews-vectors-negative300.bin'
+fn_wordvc = "../supplementary/wordvec/chinese.vec"
 vectors, s, f = corpus.compact_word_vectors(vocab, filename=fn_wordvc)
+
 # Save all of the preprocessed files
-pickle.dump(vocab, open('vocab.pkl', 'w'))
-pickle.dump(corpus, open('corpus.pkl', 'w'))
+vocab_reversed = {v:k for k, v in vocab.items()}
+
+pickle.dump(vocab_reversed, open("vocab.pkl", "wb"))
+pickle.dump(corpus, open("corpus.pkl", "wb"))
+
 np.save("flattened", flattened)
 np.save("doc_ids", doc_ids)
 np.save("pruned", pruned)
