@@ -35,7 +35,7 @@ def isnt_stop_word(word, stopwords):
     if word in stopwords:
         return False
     
-    ascii_ = set(string.printable + "“”")
+    ascii_ = set(string.printable + "“”") - set(string.ascii_letters)
     if any((c in ascii_) for c in word):
         return False
     
@@ -62,7 +62,7 @@ def filter_proper_nouns(words, nouns):
 
 def process_file(path, stopwords):
     doc = load_doc(path)
-    seg_list = segment(doc)
+    seg_list = list(segment(doc))
     filtered = filter_stop_words(seg_list, stopwords)
 
     proper_nouns = get_proper_nouns(doc)
