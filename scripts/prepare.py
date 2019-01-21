@@ -64,7 +64,7 @@ pruned = corpus.filter_count(compact, min_count=10)
 bow = corpus.compact_to_bow(pruned)
 # Words tend to have power law frequency, so selectively
 # downsample the most prevalent words
-clean = corpus.subsample_frequent(pruned, threshold=1e-9)
+clean = corpus.subsample_frequent(pruned, threshold=1e-2)
 
 # Now flatten a 2D array of document per row and word position
 # per column to a 1D array of words. This will also remove skips
