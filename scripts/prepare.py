@@ -59,18 +59,20 @@ corpus.finalize()
 # This builds a new compact index
 compact = corpus.to_compact(tokens)
 # Remove extremely rare words
-pruned = corpus.filter_count(compact, min_count=3)
+pruned = corpus.filter_count(compact, min_count=10)
 # Convert the compactified arrays into bag of words arrays
 bow = corpus.compact_to_bow(pruned)
 # Words tend to have power law frequency, so selectively
 # downsample the most prevalent words
-clean = corpus.subsample_frequent(pruned)
+clean = corpus.subsample_frequent(pruned, threshold=1e-9)
 
 # Now flatten a 2D array of document per row and word position
 # per column to a 1D array of words. This will also remove skips
 # and OoV words
 doc_ids = np.arange(pruned.shape[0])
 flattened, (doc_ids,) = corpus.compact_to_flat(pruned, doc_ids)
+
+print("Unique words in corpus:", flattened.max() + 1)
 assert flattened.min() >= 0
 
 # Fill in the pretrained word vectors
