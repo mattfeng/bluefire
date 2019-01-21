@@ -35,7 +35,7 @@ n_vocab = flattened.max() + 1
 # 'Strength' of the dircihlet prior; 200.0 seems to work well
 clambda = 200.0
 # Number of topics to fit
-n_topics = int(os.getenv('n_topics', 20))
+n_topics = int(os.getenv('n_topics', 25))
 batchsize = 4096
 # Power for neg sampling
 power = float(os.getenv('power', 0.75))
