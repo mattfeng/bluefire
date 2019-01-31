@@ -20,7 +20,7 @@ ETA = 0.4
 # 'Adding Gradient Noise Improves Learning for Very Deep Networks'
 
 
-def train(data, unigram_distribution, word_vectors, save_loc,
+def train(data, unigram_distribution, word_vectors, save_loc=".",
           doc_weights_init=None, n_topics=25,
           batch_size=4096, n_epochs=200,
           lambda_const=100.0, num_sampled=15,
@@ -153,11 +153,11 @@ def train(data, unigram_distribution, word_vectors, save_loc,
     except (KeyboardInterrupt, SystemExit):
         print(' Interruption detected, exiting the program...')
 
-    _write_training_logs(losses)
+    _write_training_logs(save_loc, losses)
     torch.save(model.state_dict(), f"{save_loc}/model_state.pytorch")
 
 
-def _write_training_logs(losses):
+def _write_training_logs(save_loc, losses):
     with open(f"{save_loc}/training_logs.txt", 'w') as f:
         column_names = 'epoch,negative_sampling_loss,dirichlet_prior_loss\n'
         f.write(column_names)

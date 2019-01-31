@@ -20,12 +20,22 @@ db = mysql.connector.connect(
 )
 
 data_folder = sys.argv[1]
-save_loc = f"./data/{data_folder}/raw/"
+save_loc = f"./data/{data_folder}/raw"
 
 cursor = db.cursor()
-cursor.execute("SELECT * FROM AStockNewsV0;")
+offset = 0
+amt = 100
 
-results = cursor.fetchall()
+results = None
 
-for row in results:
-    print(row)
+while results is None or len(results) > 0:
+    cursor.execute(f"SELECT content FROM AStockNewsV1 LIMIT {offset}, {amt};")
+    results = cursor.fetchall()
+
+    for idx, row in enumerate(results):
+        content, = row
+        with open(f"{save_loc}/{offset + idx}.txt", "w") as f:
+            f.write(f"{content}\n")
+
+    offset += amt
+    print(f"[i] Finished retrieving first {offset} results.")

@@ -1,0 +1,9 @@
+2019-01-31 07:58:22,564 [ERROR] mongo_connector.util:109 - Fatal Exception
+Traceback (most recent call last):
+  File "/Users/mattfeng/envs/deep/lib/python3.6/site-packages/mongo_connector/util.py", line 107, in wrapped
+    func(*args, **kwargs)
+  File "/Users/mattfeng/envs/deep/lib/python3.6/site-packages/mongo_connector/connector.py", line 418, in run
+    self.write_oplog_progress()
+  File "/Users/mattfeng/envs/deep/lib/python3.6/site-packages/mongo_connector/connector.py", line 252, in write_oplog_progress
+    os.rename(self.oplog_checkpoint, backup_file)
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/mattfeng/bluefire/src/oplog.timestamp' -> '/Users/mattfeng/bluefire/src/oplog.timestamp.backup'

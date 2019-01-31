@@ -28,8 +28,8 @@ def main():
     # set doc_weights_init=None
     train(
         data, unigram_distribution, word_vectors,
-        doc_weights_init,
-        f"./data/{data_folder}/models",
+        doc_weights_init=doc_weights_init,
+        save_loc=f"./data/{data_folder}/models",
         n_topics=25,
         batch_size=1024*7, n_epochs=500,
         lambda_const=500.0, num_sampled=15,

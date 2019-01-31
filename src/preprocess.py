@@ -10,8 +10,8 @@ import sys
 import numpy as np
 
 # define constants
-MIN_COUNTS = 20
-MAX_COUNTS = 1800
+MIN_COUNTS = 30
+MAX_COUNTS = 250000
 MIN_LENGTH = 15
 HALF_WINDOW_SIZE = 5
 N_TOPICS = 25
@@ -24,11 +24,15 @@ data_folder = sys.argv[1]
 
 # read in all the different documents
 files = glob.glob(f"./data/{data_folder}/segmented/*.txt")
+doc2id = dict()
+id2doc = dict()
 encoder = dict() # word -> id
 encoded_docs = []
 docs = []
 word_idx = 0
-for i, file in enumerate(files):
+for i, file in tqdm(enumerate(files)):
+    doc2id[file] = i
+    id2doc[i] = file
     encoded_doc = []
     doc = []
     with open(file) as fstream:
@@ -65,19 +69,36 @@ unigram_distribution = word_counts / sum(word_counts)
 # create the windows for lda2vec to run over
 data = []
 
-for index, doc in enumerate(encoded_docs):
-    windows = get_windows(doc, HALF_WINDOW_SIZE)
-    data += [[index, w[0]] + w[1] for w in windows]
+print("[i] Generating windows...")
+for index, doc in tqdm(encoded_docs):
+    try:
+        windows = get_windows(doc, HALF_WINDOW_SIZE)
+        data += [[index, w[0]] + w[1] for w in windows]
+    except AssertionError as e:
+        print(str(e))
+        print(id2doc[index])
+        print(index)
 
 data = np.array(data, dtype='int64')
 
 # create the initial weights for the document vectors using raw LDA
-texts = [list(filter(lambda w: MIN_COUNTS <= c[w] <= MAX_COUNTS, doc)) for i, doc in docs]
+texts = [list(filter(lambda w: MIN_COUNTS <= counts[w] <= MAX_COUNTS, doc)) for i, doc in docs]
 dictionary = corpora.Dictionary(texts)
 corpus = [dictionary.doc2bow(text) for text in texts]
 
+print("[i] Forming LDA model...")
 lda = models.LdaModel(corpus, alpha=0.9, id2word=dictionary, num_topics=N_TOPICS)
 corpus_lda = lda[corpus]
+
+# save the info needed to visualize in pyLDAvis
+np.save(f"./data/{data_folder}/npy/LDA_lda.npy", lda)
+np.save(f"./data/{data_folder}/npy/LDA_corpus.npy", corpus)
+np.save(f"./data/{data_folder}/npy/LDA_dictionary.npy", dictionary)
+
+# import pyLDAvis.gensim
+
+# pyLDAvis.enable_notebook()
+# pyLDAvis.gensim.prepare(lda, corpus, dictionary)
 
 doc_weights_init = np.zeros((len(corpus_lda), N_TOPICS))
 
@@ -92,10 +113,19 @@ for i, topics in lda.show_topics(N_TOPICS, formatted=False):
     keywords.append(set([t for t, _ in topics]))
     print("topic", i, ":", " ".join([t for t, _ in topics]))
 
+# save all the necessary data
+np.save(f"./data/{data_folder}/npy/doc2id.npy", doc2id)
+np.save(f"./data/{data_folder}/npy/id2doc.npy", id2doc)
+np.save(f"./data/{data_folder}/npy/decoder.npy", decoder)
+np.save(f"./data/{data_folder}/npy/unigram_distribution.npy", unigram_distribution)
+np.save(f"./data/{data_folder}/npy/data.npy", data)
+np.save(f"./data/{data_folder}/npy/doc_weights_init.npy", doc_weights_init)
+
 # create the word vectors via a skip-gram word2vec model
 vocab_size = len(decoder)
 embedding_dim = 50
 
+print("[i] Training word2vec model...")
 # train a skip-gram word2vec model
 texts = [doc for i, doc in docs]
 model = models.Word2Vec(texts, size=embedding_dim, window=5, workers=4, sg=1, negative=15, iter=1000, min_count=1)
@@ -107,9 +137,5 @@ for word, i in encoder.items():
 
 print("Number of word vectors:", len(model.wv.vocab))
 
-# save all the necessary data
-np.save(f"./data/{data_folder}/npy/decoder.npy", decoder)
-np.save(f"./data/{data_folder}/npy/unigram_distribution.npy", unigram_distribution)
-np.save(f"./data/{data_folder}/npy/data.npy", data)
-np.save(f"./data/{data_folder}/npy/doc_weights_init.npy", doc_weights_init)
+# save the word2vec model
 np.save(f"./data/{data_folder}/npy/word_vectors.npy", word_vectors)

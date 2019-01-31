@@ -13,7 +13,7 @@ def get_windows(doc, hws=5):
             Number of the tuples = len(doc).
     """
     length = len(doc)
-    assert length > 2*hws, 'doc is too short!'
+    assert length > 2*hws, f"Doc (length={length}) is too short!"
 
     inside = [(w, doc[(i - hws):i] + doc[(i + 1):(i + hws + 1)])
               for i, w in enumerate(doc[hws:-hws], hws)]

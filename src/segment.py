@@ -8,6 +8,8 @@ import string
 import re
 import sys
 
+from tqdm import tqdm
+
 def load_doc(path):
     """Load in a document"""
     corpus = ""
@@ -83,7 +85,7 @@ def main():
     stopwords = load_stop_words()
 
     files = glob.glob(f"./data/{data_folder}/raw/*.txt")
-    for path in files:
+    for path in tqdm(files):
         processed = process_file(path, stopwords)
 
         with open(path.replace("raw", "segmented"), "w") as out:
