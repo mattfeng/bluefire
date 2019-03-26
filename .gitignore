@@ -10,3 +10,4 @@ models/
 raw/
 segmented/
 data/
+*.json

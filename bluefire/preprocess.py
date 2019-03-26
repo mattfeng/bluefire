@@ -117,6 +117,7 @@ for i, topics in lda.show_topics(N_TOPICS, formatted=False):
 np.save(f"./data/{data_folder}/npy/doc2id.npy", doc2id)
 np.save(f"./data/{data_folder}/npy/id2doc.npy", id2doc)
 np.save(f"./data/{data_folder}/npy/decoder.npy", decoder)
+np.save(f"./data/{data_folder}/npy/encoder.npy", encoder)
 np.save(f"./data/{data_folder}/npy/unigram_distribution.npy", unigram_distribution)
 np.save(f"./data/{data_folder}/npy/data.npy", data)
 np.save(f"./data/{data_folder}/npy/doc_weights_init.npy", doc_weights_init)

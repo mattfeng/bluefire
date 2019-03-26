@@ -63,9 +63,11 @@ def train(data, unigram_distribution, word_vectors, save_loc=".",
     # to alleviate this problem i reweight loss
     doc_ids = data[:, 0]
     unique_docs, counts = np.unique(doc_ids, return_counts=True)
-    weights = np.zeros((len(unique_docs),), 'float32')
+    print("max doc id:", max(doc_ids))
+    weights = np.zeros((max(doc_ids) + 1,), 'float32')
     for i, j in enumerate(unique_docs):
         # longer a document -> lower the document weight when computing loss
+        # switch from weights[j] to weights[i]?
         weights[j] = 1.0/np.log(counts[i])
     weights = torch.FloatTensor(weights)#.cuda()
 
