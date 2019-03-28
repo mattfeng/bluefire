@@ -27,10 +27,12 @@ $ scrapy runspider xueqiu_article_spider.py -a link_collection=<NAME OF COLLECTI
 
 This will run the scraper to retrieve the **content of the articles** using the links stored in the collection used by `xueqiu_link_scraper.py`. The second argument to the command is the name of the collection that the scraper should save the articles to. This can be arbitrary, but it will be used in the `xueqiu_comments_scraper.py` as well.
 
+TODO: Add information about the comments scraper once it is completed
+
 ## Exporting the articles to JSON
 
 The collection that stores the articles can be exported as JSON format using the `mongoexport` utility, as follows:
 
 ```
-mongoexport --db "bluefire" --collection "COLLECTION_WITH_ARTICLES_NAME" --out "ARTICLES_OUTPUT_FILE_NAME.json"
+$ mongoexport --db "bluefire" --collection "COLLECTION_WITH_ARTICLES_NAME" --out "ARTICLES_OUTPUT_FILE_NAME.json"
 ```
