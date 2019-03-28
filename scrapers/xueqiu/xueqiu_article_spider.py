@@ -10,7 +10,8 @@ class XueqiuArticleSpider(scrapy.Spider):
         if link_collection is None or article_collection is None:
             quit()
 
-        print("[info] Using {} as MongoDB collection".format(link_collection))
+        print("[info] Using `{}` as MongoDB source (link) collection".format(link_collection))
+        print("[info] Saving articles to Mongo collection `{}`".format(article_collection))
         self.client = pymongo.MongoClient("mongodb://localhost:27017/")
         self.db = self.client["bluefire"]
         self.link_col = self.db[link_collection]
@@ -32,14 +33,14 @@ class XueqiuArticleSpider(scrapy.Spider):
             }))
         ]
 
-        for url, article_id, created_at in urls:
-            yield scrapy.Request(url, callback=self.parse, headers={
+        for link, article_id, created_at in urls:
+            yield scrapy.Request(link, callback=self.parse, headers={
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
                 "Cookie": "_ga=GA1.2.1831851797.1552318131; device_id=fdac4e98e251135f1d9358c29c86f6f5; s=fi11i3vu0x; xq_a_token=81d45773abb1b366e832845c99c1c70dc9657551; xq_a_token.sig=8GjDWaPUPffpVUZFEG1Qw4rtM-U; xq_r_token=b9b80f015be55a28a155ffd7b95102c453a7273f; xq_r_token.sig=Xcs0PISsRDxf4ZvBdguYPn4t2oU; u=791553533010243"
-            }, meta={"url": url, "article_id": article_id, "created_at": created_at})
+            }, meta={"link": link, "article_id": article_id, "created_at": created_at})
 
     def parse(self, response):
-        url = response.meta["url"]
+        link = response.meta["link"]
         article_id = response.meta["article_id"]
         created_at = response.meta["created_at"]
         content = response.css("article").get()
@@ -49,7 +50,7 @@ class XueqiuArticleSpider(scrapy.Spider):
         self.article_col.update_one(
             {"article_id": article_id},
             {"$set" : {
-                "url": url,
+                "link": link,
                 "article_id": article_id,
                 "created_at": created_at,
                 "content": content_stripped,
