@@ -38,12 +38,16 @@ def scrape():
             title = iteminfo["title"]
             desc = iteminfo["description"]
             link = iteminfo["target"]
+            created_at = iteminfo["created_at"]
+            view_count = iteminfo["view_count"]
 
             itemdict = {
                 "article_id": id_,
                 "title": title,
                 "link": link,
                 "desc": desc,
+                "created_at": created_at,
+                "view_count": view_count
             }
 
             print(link)
